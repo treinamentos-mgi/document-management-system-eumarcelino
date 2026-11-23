@@ -97,4 +97,19 @@ test('valida usuário e arquivo obrigatório', async () => {
     headers: { 'X-User-Id': 'test-user' },
   });
   assert.strictEqual(missingFileResponse.status, 400);
+
+  const formData = new FormData();
+  formData.append('file', new Blob(['arquivo']), 'sem-identidade.txt');
+  const uploadWithoutOwnerResponse = await fetch(`${baseUrl}/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  assert.strictEqual(uploadWithoutOwnerResponse.status, 400);
+  assert.deepStrictEqual(fs.readdirSync(storageDirectory), []);
+
+  const missingDocumentResponse = await fetch(
+    `${baseUrl}/documents/documento-inexistente/download`,
+    { headers: { 'X-User-Id': 'test-user' } },
+  );
+  assert.strictEqual(missingDocumentResponse.status, 404);
 });
