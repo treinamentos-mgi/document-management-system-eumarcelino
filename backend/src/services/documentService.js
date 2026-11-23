@@ -1,4 +1,3 @@
-const fs = require('node:fs/promises');
 const { randomUUID } = require('node:crypto');
 const documentRepository = require('../repositories/documentRepository');
 
@@ -13,35 +12,19 @@ async function createDocument(file, owner) {
   };
 
   try {
-    documentRepository.save(document);
+    return documentRepository.save(document);
   } catch (error) {
-    await fs.unlink(file.path).catch(() => {});
+    await documentRepository.removeStoredFile(file.path).catch(() => {});
     throw error;
   }
-
-  const { storageName, ...publicDocument } = document;
-  return publicDocument;
 }
 
 function listDocuments(owner) {
   return documentRepository.findByOwner(owner);
 }
 
-async function findDocumentForDownload(id, owner) {
-  const document = documentRepository.findByIdAndOwner(id, owner);
-  if (!document) {
-    return null;
-  }
-
-  try {
-    await fs.access(document.filePath);
-    return document;
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return null;
-    }
-    throw error;
-  }
+function findDocumentForDownload(id, owner) {
+  return documentRepository.findByIdAndOwner(id, owner);
 }
 
 module.exports = { createDocument, listDocuments, findDocumentForDownload };
