@@ -77,6 +77,15 @@ test('faz upload, lista e baixa documentos somente para o usuário associado', a
   assert.strictEqual(downloadResponse.status, 200);
   assert.strictEqual(await downloadResponse.text(), 'conteúdo do documento');
   assert.match(downloadResponse.headers.get('content-disposition'), /documento\.txt/);
+
+  const [storedFileName] = fs.readdirSync(storageDirectory);
+  fs.unlinkSync(path.join(storageDirectory, storedFileName));
+
+  const missingFileResponse = await fetch(
+    `${baseUrl}/documents/${createdDocument.id}/download`,
+    { headers: { 'X-User-Id': owner } },
+  );
+  assert.strictEqual(missingFileResponse.status, 404);
 });
 
 test('valida usuário e arquivo obrigatório', async () => {

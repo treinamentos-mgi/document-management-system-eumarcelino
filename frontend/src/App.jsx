@@ -11,40 +11,32 @@ export default function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
-  async function loadDocuments() {
-    setIsLoading(true);
-    setError('');
+  async function loadDocuments(isCurrent = () => true) {
+    if (isCurrent()) {
+      setIsLoading(true);
+      setError('');
+    }
 
     try {
-      setDocuments(await listDocuments());
+      const result = await listDocuments();
+      if (isCurrent()) {
+        setDocuments(result);
+      }
     } catch (requestError) {
-      setError(requestError.message);
+      if (isCurrent()) {
+        setError(requestError.message);
+      }
     } finally {
-      setIsLoading(false);
+      if (isCurrent()) {
+        setIsLoading(false);
+      }
     }
   }
 
   useEffect(() => {
     let isActive = true;
 
-    async function loadInitialDocuments() {
-      try {
-        const result = await listDocuments();
-        if (isActive) {
-          setDocuments(result);
-        }
-      } catch (requestError) {
-        if (isActive) {
-          setError(requestError.message);
-        }
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadInitialDocuments();
+    loadDocuments(() => isActive);
     return () => {
       isActive = false;
     };
@@ -123,7 +115,7 @@ export default function App() {
               <button
                 className="text-button refresh-button"
                 type="button"
-                onClick={loadDocuments}
+                onClick={() => loadDocuments()}
                 disabled={isLoading}
               >
                 {isLoading ? 'Atualizando...' : 'Atualizar lista'}

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import formatFileSize from '../utils/formatFileSize.js';
 
 export default function UploadComponent({ onUpload, isUploading }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -71,14 +72,4 @@ export default function UploadComponent({ onUpload, isUploading }) {
       </button>
     </form>
   );
-}
-
-function formatFileSize(bytes) {
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
